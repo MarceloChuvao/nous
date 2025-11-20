@@ -34,9 +34,12 @@
       }
     ]
   },
-  "storage": {
-    "rules": "storage.rules"
-  },
+  "storage": [
+    {
+      "bucket": "nous-e3e7a.firebasestorage.app",
+      "rules": "storage.rules"
+    }
+  ],
   "emulators": {
     "auth": {
       "port": 9099
