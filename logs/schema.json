@@ -1,0 +1,463 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "NOUS Log Entry Schema",
+  "description": "Schema para todas as entradas de log do NOUS OS",
+  "version": "1.0.0",
+
+  "definitions": {
+    "module_call": {
+      "type": "object",
+      "properties": {
+        "module": {
+          "type": "string",
+          "pattern": "^#[a-z-]+$",
+          "description": "Nome do módulo (ex: #vision-radiology)"
+        },
+        "input": {
+          "type": ["string", "object"],
+          "description": "Input passado para o módulo"
+        },
+        "output": {
+          "type": ["string", "object", "null"],
+          "description": "Output retornado pelo módulo"
+        },
+        "cost": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Custo em USD da chamada"
+        },
+        "duration_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Duração da execução em milissegundos"
+        },
+        "model_used": {
+          "type": "string",
+          "description": "Modelo de IA utilizado (ex: gpt-4-vision)"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["success", "error", "timeout"],
+          "description": "Status da execução"
+        },
+        "error": {
+          "type": ["string", "null"],
+          "description": "Mensagem de erro, se houver"
+        }
+      },
+      "required": ["module", "status"]
+    },
+
+    "mcp_call": {
+      "type": "object",
+      "properties": {
+        "server": {
+          "type": "string",
+          "description": "Nome do servidor MCP (ex: pubmed-search)"
+        },
+        "endpoint": {
+          "type": "string",
+          "description": "Endpoint chamado"
+        },
+        "query": {
+          "type": ["string", "object"],
+          "description": "Query enviada"
+        },
+        "results": {
+          "type": ["integer", "null"],
+          "description": "Número de resultados retornados"
+        },
+        "duration_ms": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "status": {
+          "type": "string",
+          "enum": ["success", "error", "timeout"]
+        }
+      },
+      "required": ["server", "status"]
+    },
+
+    "context_access": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "pattern": "^context:[a-z.]+$",
+          "description": "Caminho do contexto (ex: context:health.history)"
+        },
+        "operation": {
+          "type": "string",
+          "enum": ["read", "write", "delete"],
+          "description": "Tipo de operação"
+        },
+        "granted": {
+          "type": "boolean",
+          "description": "Se o acesso foi permitido"
+        },
+        "denied_reason": {
+          "type": ["string", "null"],
+          "description": "Razão da negação, se aplicável"
+        }
+      },
+      "required": ["path", "operation", "granted"]
+    }
+  },
+
+  "oneOf": [
+    {
+      "description": "Log de chamada de agent",
+      "type": "object",
+      "properties": {
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp"
+        },
+        "type": {
+          "type": "string",
+          "const": "agent_call"
+        },
+        "agent": {
+          "type": "string",
+          "pattern": "^@[a-z]+/[a-z-]+$",
+          "description": "Nome do agent (ex: @health/physician)"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$",
+          "description": "Versão do agent"
+        },
+        "input": {
+          "type": "object",
+          "properties": {
+            "user_query": {
+              "type": "string",
+              "description": "Query do usuário"
+            },
+            "context_used": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Contextos acessados"
+            }
+          }
+        },
+        "modules_called": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/module_call"
+          }
+        },
+        "mcp_calls": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/mcp_call"
+          }
+        },
+        "context_accessed": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/context_access"
+          }
+        },
+        "output": {
+          "type": ["string", "object"],
+          "description": "Resposta final do agent"
+        },
+        "cost_total": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Custo total em USD"
+        },
+        "duration_total_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Duração total em ms"
+        },
+        "user_approved": {
+          "type": "boolean",
+          "description": "Se o usuário aprovou a ação"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["success", "partial_success", "error", "cancelled"],
+          "description": "Status final"
+        }
+      },
+      "required": ["timestamp", "type", "agent", "status"]
+    },
+
+    {
+      "description": "Log de transação financeira",
+      "type": "object",
+      "properties": {
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "type": {
+          "type": "string",
+          "const": "financial_transaction"
+        },
+        "agent": {
+          "type": "string"
+        },
+        "transaction": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": ["payment", "transfer", "withdrawal", "deposit"]
+            },
+            "amount": {
+              "type": "number",
+              "description": "Valor em BRL"
+            },
+            "currency": {
+              "type": "string",
+              "default": "BRL"
+            },
+            "from_account": {
+              "type": "string"
+            },
+            "to_account": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            },
+            "category": {
+              "type": "string",
+              "description": "Categoria da transação"
+            }
+          },
+          "required": ["type", "amount", "currency"]
+        },
+        "protocol": {
+          "type": "string",
+          "description": "Protocolo usado (ex: open_banking)"
+        },
+        "user_approved": {
+          "type": "boolean"
+        },
+        "approval_method": {
+          "type": "string",
+          "enum": ["explicit", "implicit", "2FA", "automatic"],
+          "description": "Método de aprovação"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["pending", "completed", "failed", "cancelled"]
+        },
+        "confirmation_code": {
+          "type": ["string", "null"],
+          "description": "Código de confirmação do banco"
+        }
+      },
+      "required": ["timestamp", "type", "transaction", "status"]
+    },
+
+    {
+      "description": "Log de evento de segurança",
+      "type": "object",
+      "properties": {
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "type": {
+          "type": "string",
+          "const": "security_event"
+        },
+        "severity": {
+          "type": "string",
+          "enum": ["low", "medium", "high", "critical"],
+          "description": "Severidade do evento"
+        },
+        "event_type": {
+          "type": "string",
+          "enum": [
+            "permission_violation",
+            "suspicious_activity",
+            "unauthorized_access",
+            "data_breach_attempt",
+            "agent_misbehavior",
+            "fraud_detection",
+            "cost_limit_exceeded"
+          ]
+        },
+        "agent": {
+          "type": ["string", "null"],
+          "description": "Agent relacionado, se aplicável"
+        },
+        "description": {
+          "type": "string",
+          "description": "Descrição do evento"
+        },
+        "action_taken": {
+          "type": "string",
+          "enum": [
+            "blocked",
+            "paused_agent",
+            "notified_user",
+            "logged_only",
+            "reverted_action"
+          ]
+        },
+        "details": {
+          "type": "object",
+          "description": "Detalhes específicos do evento"
+        },
+        "resolved": {
+          "type": "boolean",
+          "description": "Se o evento foi resolvido"
+        },
+        "resolution": {
+          "type": ["string", "null"],
+          "description": "Como foi resolvido"
+        }
+      },
+      "required": ["timestamp", "type", "severity", "event_type", "action_taken"]
+    },
+
+    {
+      "description": "Log de operação no VAULT",
+      "type": "object",
+      "properties": {
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "type": {
+          "type": "string",
+          "const": "vault_operation"
+        },
+        "operation": {
+          "type": "string",
+          "enum": ["sync", "upload", "download", "delete", "move", "access"]
+        },
+        "file_path": {
+          "type": "string",
+          "description": "Caminho do arquivo no VAULT"
+        },
+        "source": {
+          "type": "string",
+          "description": "Fonte da operação (local, google_drive, etc)"
+        },
+        "size_bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Tamanho do arquivo em bytes"
+        },
+        "agent": {
+          "type": ["string", "null"],
+          "description": "Agent que realizou a operação"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["success", "partial", "failed", "in_progress"]
+        },
+        "duration_ms": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "error": {
+          "type": ["string", "null"]
+        }
+      },
+      "required": ["timestamp", "type", "operation", "status"]
+    },
+
+    {
+      "description": "Log de protocolo externo (FHIR, MCP, etc)",
+      "type": "object",
+      "properties": {
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "type": {
+          "type": "string",
+          "const": "protocol_call"
+        },
+        "protocol": {
+          "type": "string",
+          "enum": ["fhir", "open_banking", "e_commerce", "mcp", "agent_protocol"]
+        },
+        "endpoint": {
+          "type": "string",
+          "description": "URL ou identificador do endpoint"
+        },
+        "agent": {
+          "type": "string",
+          "description": "Agent que fez a chamada"
+        },
+        "request": {
+          "type": "object",
+          "description": "Dados da requisição (sanitizados)"
+        },
+        "response": {
+          "type": "object",
+          "description": "Dados da resposta (sanitizados)"
+        },
+        "status_code": {
+          "type": "integer",
+          "description": "HTTP status code ou equivalente"
+        },
+        "duration_ms": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "cost": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Custo, se aplicável"
+        }
+      },
+      "required": ["timestamp", "type", "protocol", "agent"]
+    },
+
+    {
+      "description": "Log de sistema (boot, errors, etc)",
+      "type": "object",
+      "properties": {
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "type": {
+          "type": "string",
+          "const": "system"
+        },
+        "level": {
+          "type": "string",
+          "enum": ["debug", "info", "warning", "error", "critical"]
+        },
+        "component": {
+          "type": "string",
+          "description": "Componente do sistema (CORE, VAULT, LENS, etc)"
+        },
+        "message": {
+          "type": "string",
+          "description": "Mensagem de log"
+        },
+        "error_code": {
+          "type": ["string", "null"],
+          "description": "Código de erro, se aplicável"
+        },
+        "stack_trace": {
+          "type": ["string", "null"],
+          "description": "Stack trace, se erro"
+        },
+        "metadata": {
+          "type": "object",
+          "description": "Metadados adicionais"
+        }
+      },
+      "required": ["timestamp", "type", "level", "component", "message"]
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "name": "@nous/vfs",
+  "version": "1.0.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist",
+    "lint": "eslint src",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@nous/types": "workspace:*",
+    "firebase-admin": "^13.6.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2",
+    "@types/node": "^22.10.5"
+  }
+}

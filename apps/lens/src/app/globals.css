@@ -1,0 +1,68 @@
+@import "tailwindcss";
+
+@theme {
+  /* Primary Colors - NOUS Blue */
+  --color-primary-50: #f0f9ff;
+  --color-primary-100: #e0f2fe;
+  --color-primary-400: #38bdf8;
+  --color-primary-500: #0ea5e9;
+  --color-primary-600: #0284c7;
+  --color-primary-700: #0369a1;
+  --color-primary: #0ea5e9;
+  --color-primary-foreground: #ffffff;
+
+  /* Secondary Colors - NOUS Purple */
+  --color-secondary-50: #faf5ff;
+  --color-secondary-100: #f3e8ff;
+  --color-secondary-400: #c084fc;
+  --color-secondary-500: #a855f7;
+  --color-secondary-600: #9333ea;
+  --color-secondary-700: #7e22ce;
+  --color-secondary: #f4f4f5;
+  --color-secondary-foreground: #18181b;
+
+  /* Gray Scale */
+  --color-gray-50: #fafafa;
+  --color-gray-100: #f4f4f5;
+  --color-gray-200: #e4e4e7;
+  --color-gray-300: #d4d4d8;
+  --color-gray-400: #a1a1aa;
+  --color-gray-500: #71717a;
+  --color-gray-600: #52525b;
+  --color-gray-700: #3f3f46;
+  --color-gray-800: #27272a;
+  --color-gray-900: #18181b;
+
+  /* Icon Background Colors */
+  --color-blue-100: #dbeafe;
+  --color-blue-600: #2563eb;
+  --color-green-100: #dcfce7;
+  --color-green-600: #16a34a;
+  --color-purple-100: #f3e8ff;
+  --color-purple-600: #9333ea;
+  --color-red-100: #fee2e2;
+  --color-red-600: #dc2626;
+
+  /* Semantic Colors */
+  --color-background: #ffffff;
+  --color-foreground: #18181b;
+  --color-muted: #f4f4f5;
+  --color-muted-foreground: #71717a;
+  --color-accent: #f4f4f5;
+  --color-accent-foreground: #18181b;
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: #ffffff;
+  --color-border: #e4e4e7;
+  --color-input: #e4e4e7;
+  --color-ring: #0ea5e9;
+  --color-card: #ffffff;
+  --color-card-foreground: #18181b;
+
+  /* Utility Colors */
+  --color-white: #ffffff;
+  --color-black: #000000;
+  --color-red-50: #fef2f2;
+  --color-red-500: #ef4444;
+  --color-red-700: #b91c1c;
+  --color-zinc-900: #18181b;
+}
